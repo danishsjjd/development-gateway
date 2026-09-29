@@ -1,0 +1,24 @@
+# Reload only our table, leaving Docker, Tailscale and UFW rules intact.
+# The installer substitutes the existing caddy_net bridge name here.
+define caddy_bridge = "caddy_net"
+add table inet caddy_gateway
+flush table inet caddy_gateway
+
+table inet caddy_gateway {
+    chain input {
+        type filter hook input priority -10; policy accept;
+
+        # Reserve this range for proxied development, on every host address
+        # and both IP families. Keep direct host-loopback access working.
+        iifname "lo" tcp dport 3000-9999 accept
+        iifname $caddy_bridge ip saddr 172.18.0.2 ip daddr 172.18.0.1 tcp dport 3000-9999 accept
+        tcp dport 3000-9999 counter drop
+    }
+
+    chain forward {
+        type filter hook forward priority -10; policy accept;
+
+        # Docker has already translated the host IP to Caddy's container IP.
+        ip daddr 172.18.0.2 meta l4proto { tcp, udp } th dport 443 iifname != "tailscale0" counter drop
+    }
+}

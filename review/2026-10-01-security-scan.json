@@ -1,0 +1,63 @@
+{
+  "review_date": "2026-10-01",
+  "scanner": "Trivy 0.74.0",
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-10-02T01:24:14.992990943Z",
+    "UpdatedAt": "2026-10-01T01:24:14.992991033Z",
+    "DownloadedAt": "2026-10-01T03:05:53.881526309Z"
+  },
+  "images": [
+    {
+      "artifact": "development-gateway-caddy:2.11.4-security1",
+      "image_id": "sha256:8babbb33a99c0e19a43fe30ff554d603168b30ecbb1ef8d9654b5857ca5563ca",
+      "findings": [
+        {
+          "class": "lang-pkgs",
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.56.0",
+          "FixedVersion": null,
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "Title": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+          "PrimaryURL": null
+        }
+      ],
+      "package_finding_counts": {
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "artifact": "development-gateway-cloudflared:2026.9.3-security1",
+      "image_id": "sha256:5f99f6a69d77ce1e4f74878ae52e093947528ff9361fe48e3b37aca32e2b8fb2",
+      "findings": [
+        {
+          "class": "lang-pkgs",
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.56.0",
+          "FixedVersion": null,
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "Title": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+          "PrimaryURL": null
+        }
+      ],
+      "package_finding_counts": {
+        "UNKNOWN": 1
+      }
+    }
+  ],
+  "assessment": {
+    "GO-2026-5932": {
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "evidence": "go tool nm on both final, unstripped static binaries found zero golang.org/x/crypto/openpgp symbols; runtime images contain neither Go source nor that package. Scanner output retained below, without ignore rules."
+    },
+    "GHSA-6365-7ppr-5r92": {
+      "status": "not_affected_by_current_configuration",
+      "evidence": "Generic Caddyfile has no forward_auth; regression tests reject its introduction while Caddy remains at 2.11.4."
+    }
+  }
+}

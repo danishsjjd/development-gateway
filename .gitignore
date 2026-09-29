@@ -1,0 +1,6 @@
+.env
+.env.secret
+.cloudflared.token
+/caddy_config/
+/caddy_data/
+__pycache__/

@@ -1,0 +1,63 @@
+{
+	# Never listen on backend app networks, including automatic HTTP redirects.
+	default_bind 172.18.0.2
+	auto_https disable_redirects
+	servers 172.18.0.2:8080 {
+		trusted_proxies static 172.18.0.3/32
+		trusted_proxies_strict
+		client_ip_headers CF-Connecting-IP
+	}
+}
+
+# Import inside every app's reverse_proxy block; app requests must be HTTPS.
+(app_proxy_headers) {
+	header_up Host {host}
+	header_up X-Forwarded-Host {host}
+	header_up X-Forwarded-For {client_ip}
+	header_up X-Real-IP {client_ip}
+	header_up CF-Connecting-IP {client_ip}
+	header_up -True-Client-IP
+	header_up -CF-Connecting-IPv6
+	header_up -Forwarded
+	header_up X-Forwarded-Proto https
+	header_up X-Forwarded-Port 443
+}
+
+*.local.{$MY_DOMAIN} {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	encode zstd gzip
+
+	# Add private app handlers here, before numeric development routing.
+	@dev header_regexp dev Host ^(?P<port>[3-9][0-9]{3})\.
+	handle @dev {
+		reverse_proxy host.docker.internal:{re.dev.port} {
+			import app_proxy_headers
+			header_up Host localhost:{re.dev.port}
+		}
+	}
+
+	handle {
+		respond "No development server is configured for this hostname." 404
+	}
+}
+
+:8080 {
+	log
+	encode zstd gzip
+
+	# Check the socket peer, never a visitor-supplied client-IP header.
+	route {
+		@notTunnel not remote_ip 172.18.0.3
+		respond @notTunnel "Only Cloudflare Tunnel may access this listener." 403
+		@notHTTPS not header X-Forwarded-Proto https
+		redir @notHTTPS https://{host}{uri} 308
+
+		# Add public app handlers here, after the checks and before the fallback.
+		handle {
+			respond "No public application is configured for this hostname." 404
+		}
+	}
+}

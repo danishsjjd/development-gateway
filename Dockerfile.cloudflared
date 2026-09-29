@@ -1,0 +1,24 @@
+FROM golang:1.27.1-alpine3.23@sha256:0908ac9b9319e09d7c238aabe914e0395c51d63c4e3d0ae8c554fda9158a5769 AS builder
+ENV CGO_ENABLED=0 GOTOOLCHAIN=local
+# Release 2026.9.3, verified upstream source archive; do not follow master.
+ADD --checksum=sha256:f247f358f4dcc54d83a717be25b337f3e87ab4033e95e703b2d7e576bd534fef https://codeload.github.com/cloudflare/cloudflared/tar.gz/refs/tags/2026.9.3 /tmp/cloudflared.tar.gz
+WORKDIR /src
+RUN tar -xzf /tmp/cloudflared.tar.gz --strip-components=1 && rm /tmp/cloudflared.tar.gz
+# These locks differ from the release only by the security dependency update
+# and its resulting module graph. Never resolve new versions during a build.
+COPY build/cloudflared/go.mod build/cloudflared/go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY build/healthcheck/main.go /healthcheck/main.go
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -mod=readonly -trimpath \
+      -ldflags="-X main.Version=2026.9.3 -X main.BuildTime=2026-10-01 -X github.com/cloudflare/cloudflared/metrics.Runtime=virtual" \
+      -o /out/cloudflared ./cmd/cloudflared && \
+    go build -trimpath -o /out/healthcheck /healthcheck/main.go
+
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3
+COPY --from=builder /out/cloudflared /usr/local/bin/cloudflared
+COPY --from=builder /out/healthcheck /usr/bin/healthcheck
+USER 1000:1000
+ENTRYPOINT ["/usr/local/bin/cloudflared"]
+CMD ["version"]

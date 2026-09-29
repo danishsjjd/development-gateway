@@ -1,0 +1,13 @@
+[Unit]
+Description=Protect Caddy HTTPS and host development ports
+After=nftables.service
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env nft -f /etc/caddy-gateway.nft
+ExecReload=/usr/bin/env nft -f /etc/caddy-gateway.nft
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
