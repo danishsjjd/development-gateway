@@ -50,6 +50,8 @@ services:
       - ./caddy_data:/data
 
   cloudflared:
+    # Enable only when publishing apps: docker compose --profile public up -d --build
+    profiles: [public]
     build:
       context: .
       dockerfile: Dockerfile.cloudflared

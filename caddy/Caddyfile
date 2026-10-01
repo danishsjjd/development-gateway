@@ -11,7 +11,6 @@
 
 # Import inside every app's reverse_proxy block; app requests must be HTTPS.
 (app_proxy_headers) {
-	header_up Host {host}
 	header_up X-Forwarded-Host {host}
 	header_up X-Forwarded-For {client_ip}
 	header_up X-Real-IP {client_ip}
