@@ -41,7 +41,7 @@ apps at `172.18.0.1`. Backend apps cannot use Caddy as a packet router.
 
 The installer discovers the bridge, validates and atomically loads only its
 own nftables table, and saves prior rules/units under
-`/var/backups/remote-gateway-firewall-*`. It restores that snapshot on failure
+`/var/backups/development-gateway-firewall-*`. It restores that snapshot on failure
 and prints the restore command on success. It does not restart Docker.
 
 Rules load before Docker at boot. If the firewall service fails, Docker will

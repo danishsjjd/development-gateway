@@ -27,7 +27,7 @@ case "$bridge" in
 esac
 
 mkdir -p /var/backups
-backup_dir=$(mktemp -d /var/backups/remote-gateway-firewall-XXXXXXXX)
+backup_dir=$(mktemp -d /var/backups/development-gateway-firewall-XXXXXXXX)
 chmod 700 "$backup_dir"
 for target in /etc/caddy-gateway.nft /etc/systemd/system/caddy-gateway-firewall.service /etc/systemd/system/docker.service.d/caddy-gateway-firewall.conf; do
     name=$(basename "$target")

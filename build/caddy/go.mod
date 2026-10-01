@@ -1,4 +1,4 @@
-module remote-gateway/caddy
+module development-gateway/caddy
 
 go 1.27.1
 

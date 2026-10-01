@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 if [ "$(id -u)" -ne 0 ] || [ "$#" -ne 1 ] || [ ! -f "$1/prepared.nft" ]; then
-    echo "Usage: sudo sh scripts/restore-firewall.sh /var/backups/remote-gateway-firewall-..." >&2
+    echo "Usage: sudo sh scripts/restore-firewall.sh /var/backups/development-gateway-firewall-..." >&2
     exit 1
 fi
 backup_dir=$1
