@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: development-gateway-caddy:2.11.4-security1
+    image: development-gateway-caddy:2.11.7-security1
     container_name: caddy
     hostname: caddy
     restart: unless-stopped

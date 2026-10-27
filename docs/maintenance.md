@@ -62,7 +62,7 @@ The script extracts Caddy and healthcheck binaries from the built template
 image. Tests use loopback, temporary TLS/state, dummy credentials, and mock
 apps. They cover default denials, numeric routing, private TLS, example public
 allowlists/authentication, tunnel-peer checks, HTTPS redirects, forwarded
-headers, WebSockets, health checks, and the patched CEL matcher.
+headers, WebSockets, health checks, and the CEL expression matcher.
 You need Docker and Python 3.9 or newer on Linux.
 
 Do not start this template or run the firewall installer just to test it on a
@@ -76,9 +76,10 @@ The custom Caddy build includes the Cloudflare DNS module for wildcard
 certificates. Both images use pinned releases, Go dependency locks, and image
 digests; this work is for image upgrades, not daily development.
 
-Caddy 2.11.4 includes patched dependencies and a checked two-line CEL
-compatibility backport. cloudflared 2026.10.3 retains the patched SSH dependency
-and uses Go 1.27.3 plus an updated certificate trust store for the eMudhra fix.
+Caddy 2.11.7 includes the upstream proxy and CEL compatibility fixes, with
+chi v5.4.0 and x/net v0.60.0 security pins. cloudflared 2026.10.3 retains the
+patched SSH dependency. Both images use Go 1.27.3 and an updated certificate
+trust store for the eMudhra fix.
 Static distroless runtimes omit the old native libraries. Dated scan results
 and remaining advisory assessments are in [SECURITY.md](../SECURITY.md).
 
@@ -96,10 +97,24 @@ docker compose --profile public ps cloudflared
 Use these deployment commands only when intending to replace the running tunnel,
 not for template validation. A container restart alone keeps its old image.
 
+To replace Caddy after validation on the actual gateway checkout:
+
+```bash
+docker compose build caddy
+docker compose up -d --no-deps --no-build caddy
+docker compose exec caddy caddy version
+docker compose ps caddy
+```
+
+This briefly interrupts proxy requests. Keep the previous image available for
+rollback and verify actual HTTPS routes after replacement. Use these commands
+only for deployment, not template tests.
+
 On an upgrade, review upstream releases/advisories, update source checksums and
 module locks deliberately, retain digest pins, build/scan both images, and run
 the tests. A dated clean scan cannot guarantee future versions or custom app
 configurations are free of vulnerabilities.
 
-Do not add `forward_auth` with the pinned Caddy release; see the upstream
-advisory assessment in [SECURITY.md](../SECURITY.md).
+The pinned Caddy release fixes the earlier `forward_auth` advisory. The gateway
+still omits this feature; adding it requires dedicated authentication tests.
+See [SECURITY.md](../SECURITY.md).

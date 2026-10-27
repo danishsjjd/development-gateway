@@ -70,7 +70,7 @@ class GatewayHarness(unittest.TestCase):
         cls.http_port, cls.https_port, cls.admin_port = (unused_port() for _ in range(3))
         configuration = (ROOT / "caddy/Caddyfile").read_text()
         if "forward_auth" in configuration:
-            raise RuntimeError("Caddy 2.11.4 forward_auth advisory is not remediated upstream")
+            raise RuntimeError("forward_auth requires dedicated gateway authentication tests")
         configuration = configuration.replace("172.18.0.2", "127.0.0.1").replace("172.18.0.3", "127.0.0.3")
         configuration = configuration.replace(":8080", ":" + str(cls.http_port))
         configuration = configuration.replace("{\n", "{\n\tskip_install_trust\n\thttps_port " +
@@ -98,7 +98,7 @@ class GatewayHarness(unittest.TestCase):
             configuration = configuration.replace("# Add private app handlers here, before numeric development routing.", private_handler)
             configuration = configuration.replace("# Add public app handlers here, after the checks and before the fallback.", public_handler)
         configuration = configuration.replace("host.docker.internal:", "127.0.0.1:")
-        # Exercise both the upgraded CEL module and the Caddy compatibility patch.
+        # Exercise the CEL expression matcher with the pinned upstream Caddy release.
         configuration = configuration.replace("\tencode zstd gzip", "\tencode zstd gzip\n" +
             "\t@cel expression path('/cel-test')\n\thandle @cel {\n\t\trespond \"CEL matcher works\" 200\n\t}\n", 1)
         config_path = cls.directory / "Caddyfile"
@@ -220,7 +220,7 @@ class ExampleRoutesTests(GatewayHarness):
         self.assertEqual(subprocess.run([binary, "http://127.0.0.1:" + str(self.admin_port) + "/config/"], capture_output=True).returncode, 0)
         self.assertNotEqual(subprocess.run([binary, "http://127.0.0.1:" + str(self.http_port) + "/"], capture_output=True).returncode, 0)
 
-    def test_patched_cel_expression_matcher(self):
+    def test_cel_expression_matcher(self):
         status, _, body = self.request("unknown.local.example.com", "/cel-test", private=True)
         self.assertEqual(status, 200)
         self.assertEqual(body, b"CEL matcher works")

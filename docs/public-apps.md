@@ -129,5 +129,6 @@ docker exec caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 
 Run reload only if validation succeeded.
 
-Do not add `forward_auth` with the pinned Caddy release; see [SECURITY.md](../SECURITY.md) for the
-upstream advisory. The default configuration does not use it.
+The pinned Caddy release fixes the earlier `forward_auth` advisory; see
+[SECURITY.md](../SECURITY.md). The default configuration still omits this feature;
+adding it requires dedicated authentication tests.

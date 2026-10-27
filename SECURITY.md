@@ -1,5 +1,40 @@
 # Security build and verification
 
+## Caddy upgrade — 2026-10-27
+
+Caddy is pinned to [2.11.7](https://github.com/caddyserver/caddy/releases/tag/v2.11.7),
+built with [Go 1.27.3](https://go.dev/doc/devel/release#go1.27.3) and locked
+modules. chi is pinned to v5.4.0 for
+[CVE-2026-114437](https://github.com/advisories/GHSA-j6qf-3m9c-vwj3), and
+x/net to v0.60.0 for the October HTTP/2 fixes. The digest-pinned builder and
+static distroless runtime match the refreshed cloudflared build, including
+the updated CA trust store. The Compose image is
+`development-gateway-caddy:2.11.7-security1`.
+
+The upstream release includes the CEL compatibility changes, so the previous
+vendored source patch is removed. Builds use the verified module locks with
+`-mod=readonly`; the Cloudflare DNS module remains at v0.2.4.
+
+Caddy 2.11.7 also includes the fix for
+[GHSA-6365-7ppr-5r92](https://github.com/caddyserver/caddy/security/advisories/GHSA-6365-7ppr-5r92),
+which was fixed upstream in 2.11.5. The gateway still omits `forward_auth`, and
+tests reject introducing it without dedicated authentication coverage.
+
+Trivy 0.76.1 with the October 27 database reports no Critical, High, Medium,
+or Low findings in either final image, without vulnerability ignore rules.
+This clears the earlier Caddy scan's 9 High, 23 Medium, and 2 Low package
+findings, plus its outdated CA bundle flag. One Unknown OpenPGP advisory
+remains per image. Symbol inspection of the final Caddy binary confirms that
+`golang.org/x/crypto/openpgp` is absent; the unchanged cloudflared image retains
+the earlier assessment. The findings are retained in the
+[Caddy upgrade scan evidence](review/2026-10-27-caddy-security-scan.json),
+including image IDs and hashes of the Caddy build inputs and binaries.
+
+Validation passed all 12 template and 9 development tests with the built
+binaries, plus Compose validation and nonroot Caddyfile validation in read-only,
+capability-restricted runtime containers without networking or production state.
+Both worktrees build identical Caddy and healthcheck binaries.
+
 ## cloudflared upgrade — 2026-10-27
 
 cloudflared is pinned to [2026.10.3](https://github.com/cloudflare/cloudflared/releases/tag/2026.10.3),
@@ -31,7 +66,7 @@ Evidence: [October 27 security scan](review/2026-10-27-security-scan.json).
 
 Counts are package findings, including separate entries for each binary.
 The new scan flags Caddy's existing Go, dependency, and CA bundle pins;
-these require a separate security upgrade. The October 1 clean result no
+these are addressed by the Caddy upgrade above. The October 1 clean result no
 longer represents the current advisory database. Caddy's build and its
 `forward_auth` restriction remain unchanged in this cloudflared upgrade.
 
@@ -78,10 +113,11 @@ code not present, with the scanner flag retained in the evidence. Recheck after
 dependency/feature changes. No fixed module version is published for this flag.
 
 **GHSA-6365-7ppr-5r92** affects Caddy configurations combining `forward_auth` and
-`reverse_proxy`. The template contains no `forward_auth`, and regression tests
-reject adding it while this release remains pinned. The [upstream advisory](https://github.com/caddyserver/caddy/security/advisories/GHSA-6365-7ppr-5r92)
-lists 2.11.5 as the fixed version. Upgrade to an available fixed stable release,
-with updated locks and validation, before introducing that feature.
+`reverse_proxy`. This assessment applied to the previous Caddy 2.11.4 build.
+The [upstream advisory](https://github.com/caddyserver/caddy/security/advisories/GHSA-6365-7ppr-5r92)
+lists 2.11.5 as the fixed version; the current 2.11.7 pin includes that fix.
+The template still omits `forward_auth`, and introducing it requires dedicated
+authentication coverage.
 
 These assessments cover the supplied template and dated build, not arbitrary
 app routes or future vulnerabilities. Review upstream advisories and repeat

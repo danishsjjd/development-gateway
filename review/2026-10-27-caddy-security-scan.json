@@ -1,0 +1,103 @@
+{
+  "review_date": "2026-10-27",
+  "scanner": "Trivy 0.76.1",
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-10-28T01:25:30.944314361Z",
+    "UpdatedAt": "2026-10-27T01:25:30.944314632Z",
+    "DownloadedAt": "2026-10-27T03:50:38.920641366Z"
+  },
+  "scan_options": {
+    "scanners": [
+      "vuln"
+    ],
+    "ignore_rules": false
+  },
+  "build_input_sha256": {
+    "Dockerfile": "d8258b7c01155c34b1e7d1770a3db3237eb4e544e58986f0647ada29b5b0fb1f",
+    "build/caddy/go.mod": "f307a8b04d6da2d5da5d3bd0069e3f7c91802545f2bb5f67518af29fec37be76",
+    "build/caddy/go.sum": "06b8c08174e22f3eccd0856a8077993018769d0d97a1c30201361165fc54316b",
+    "build/caddy/main.go": "d59c1c8cac821cd545a1cf9c620112c5ea95a1d6ba9b701a1f830745633ffe5f",
+    "build/healthcheck/main.go": "491d1623f287dc213988b88f1402f7ebf136933d0adbd46e87cdc048039f0353",
+    ".dockerignore": "505f48f1be5db7ef012bfa29ae7fcd44105a455730b76f82d6ea902ed26a43e1"
+  },
+  "caddy_binary_sha256": {
+    "caddy": "f2c59bf9b95e9155d04402e52bd13f2722265efd67ccb7453c5a7e9b7426030c",
+    "healthcheck": "cfdeabb7ed90a7f892a4e8718691e45e8a6b76fe0d7627ca0662e76730338493"
+  },
+  "images": [
+    {
+      "artifact": "development-gateway-caddy:2.11.7-security1",
+      "image_id": "sha256:0c0719a4e5da527a7305b9afd50feabdbbc3c4a16d3f91210f1cd3ac88015b7f",
+      "scanned_at": "2026-10-27T10:41:52.301167929+05:00",
+      "findings": [
+        {
+          "target": "usr/bin/caddy",
+          "class": "lang-pkgs",
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.57.0",
+          "FixedVersion": null,
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "Title": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+          "PrimaryURL": null
+        }
+      ],
+      "package_finding_counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "artifact": "development-gateway-cloudflared:2026.10.3-security1",
+      "image_id": "sha256:ea12dd732e402fe01182bc470bca4f449ffe0e184f5879ebe6e03e6dbfe3a833",
+      "scanned_at": "2026-10-27T10:37:20.202491356+05:00",
+      "findings": [
+        {
+          "target": "usr/local/bin/cloudflared",
+          "class": "lang-pkgs",
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.58.0",
+          "FixedVersion": null,
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "Title": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+          "PrimaryURL": null
+        }
+      ],
+      "package_finding_counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 1
+      }
+    }
+  ],
+  "validation": {
+    "template_tests_passed": 12,
+    "development_tests_passed": 9,
+    "restricted_runtime_configuration_validation": [
+      "template",
+      "development"
+    ],
+    "compose_configuration_validation": [
+      "template",
+      "development"
+    ],
+    "template_and_development_binaries_identical": true,
+    "caddy_openpgp_package_symbol_check": {
+      "package": "golang.org/x/crypto/openpgp",
+      "result": "absent",
+      "method": "go tool nm on final unstripped binary"
+    }
+  },
+  "remaining_advisory_assessment": {
+    "GO-2026-5932": "No published fix. The affected golang.org/x/crypto/openpgp package is absent from the Caddy binary by symbol inspection; the module is used for other packages. The scanner finding remains visible. The unchanged cloudflared image was assessed in the earlier October 27 review."
+  }
+}

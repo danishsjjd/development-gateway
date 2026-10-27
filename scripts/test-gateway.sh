@@ -12,7 +12,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 # Create without starting: no network access, host ports, credentials, or live state.
-test_container=$(docker create --network none development-gateway-caddy:2.11.4-security1)
+test_container=$(docker create --network none development-gateway-caddy:2.11.7-security1)
 docker cp "$test_container:/usr/bin/caddy" "$test_dir/caddy"
 docker cp "$test_container:/usr/bin/healthcheck" "$test_dir/healthcheck"
 cd "$repo_dir"
