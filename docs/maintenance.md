@@ -77,11 +77,25 @@ certificates. Both images use pinned releases, Go dependency locks, and image
 digests; this work is for image upgrades, not daily development.
 
 Caddy 2.11.4 includes patched dependencies and a checked two-line CEL
-compatibility backport. cloudflared 2026.9.3 includes a patched SSH dependency.
+compatibility backport. cloudflared 2026.10.3 retains the patched SSH dependency
+and uses Go 1.27.3 plus an updated certificate trust store for the eMudhra fix.
 Static distroless runtimes omit the old native libraries. Dated scan results
 and remaining advisory assessments are in [SECURITY.md](../SECURITY.md).
 
 Build inputs live in `Dockerfile`, `Dockerfile.cloudflared`, and `build/`.
+To deploy a validated tunnel image on the actual gateway checkout, rebuild and
+replace only cloudflared; Caddy and app containers continue running:
+
+```bash
+docker compose --profile public build cloudflared
+docker compose --profile public up -d --no-deps cloudflared
+docker compose --profile public exec cloudflared cloudflared version
+docker compose --profile public ps cloudflared
+```
+
+Use these deployment commands only when intending to replace the running tunnel,
+not for template validation. A container restart alone keeps its old image.
+
 On an upgrade, review upstream releases/advisories, update source checksums and
 module locks deliberately, retain digest pins, build/scan both images, and run
 the tests. A dated clean scan cannot guarantee future versions or custom app

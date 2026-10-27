@@ -55,7 +55,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cloudflared
-    image: development-gateway-cloudflared:2026.9.3-security1
+    image: development-gateway-cloudflared:2026.10.3-security1
     container_name: cloudflared
     user: "${PUID:-1000}:${PGID:-1000}"
     restart: unless-stopped
