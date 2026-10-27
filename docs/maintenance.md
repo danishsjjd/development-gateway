@@ -44,6 +44,14 @@ own nftables table, and saves prior rules/units under
 `/var/backups/development-gateway-firewall-*`. It restores that snapshot on failure
 and prints the restore command on success. It does not restart Docker.
 
+Restoration checks the saved rules and applies table removal/replacement as one
+atomic transaction. A rejected transaction leaves the current rules in place.
+It validates file backups before making changes and restores files and boot
+enablement without stopping or restarting the firewall service: Docker may
+depend on it. An already-active firewall oneshot remains active until reboot,
+even if the snapshot predates installation; it has no running process, and the
+saved kernel rules are restored directly.
+
 Rules load before Docker at boot. If the firewall service fails, Docker will
 not start. Keep the backup; use the printed restore command to undo the
 installation. Do not flush the gateway table when changing other rules.
@@ -64,6 +72,19 @@ apps. They cover default denials, numeric routing, private TLS, example public
 allowlists/authentication, tunnel-peer checks, HTTPS redirects, forwarded
 headers, WebSockets, health checks, and the CEL expression matcher.
 You need Docker and Python 3.9 or newer on Linux.
+
+Run the firewall recovery regression tests separately:
+
+```bash
+sh scripts/test-firewall.sh
+```
+
+These require Linux user/network namespaces, Bubblewrap (`bwrap`), nftables,
+Python 3, and util-linux (`prlimit`). They use real nftables transactions in an
+isolated network namespace, mock systemd calls, temporary system files, no
+external network, and bounded resources. They check successful and repeated
+restoration, absent/incomplete snapshots, and validation/apply failures without
+changing host rules or services. Run them through the script, without sudo.
 
 Do not start this template or run the firewall installer just to test it on a
 host with a deployed gateway. Use isolated validation containers without host
